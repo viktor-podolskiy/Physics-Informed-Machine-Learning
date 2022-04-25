@@ -23,6 +23,7 @@ In general, workflow consists of three distinct processes:
 Full cycle of data generation/ neural net training/ testing can be accomplished by running file “runMe.m”. 
 By default, the code generates low-index photonic dataset from [1], trains meaning-informed model on 10% of this dataset, and uses the model to predict all modes of the dataset. The resulting figure is shown below. Note that individual runs may produce somewhat different distributions of accuracy, especially when training set is small and limited to specific angles/etc. 
 Individual files can be used to run specific tasks; files can be edited to adjust data generation, selection of data for training subset, etc. Basic functionality is described below
+![image](ReadMeImage.png)
 
 # Dataset Generation (generateRCWAdata.m)
 Algorithm represents an implementation of the RCWA formalism, as described in Ref.[1]. The code generates a dataset for the structure of the fundamental modes supported by a periodically stratified layered composites. The parameters, outlined in the beginning of the file provide the control over the vacuum wavelength of optical signals, period of the composite, values of the parameter theta used to determine the quasi-wavenumber of the modes, as well as number of layers in the composite and the maximum refractive index in the stack, as well as the probability of encountering plasmonic layer within the stack. Finally, the complexity of the composite is parameterized by specifying the number of Fourier components via parameter mMax. 
