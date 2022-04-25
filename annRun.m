@@ -13,31 +13,31 @@ clear classes
 reset(gpuDevice(1))
 
 
-fname='./m=50/ANNtest.mat'; % file name used for string the resulting ANN
+fname ='./m=50/ANNtest.mat'; % file name used for string the resulting ANN
 
 rng(3988) % initialize random number generator to enforce repeatability of train/test/val splits
 
-NNtype=2; % 1=Black Box 2=Meaning Informed; 3=Physics Informed, labeled training only; 4=Physice Informed, add unlabeled data
-angleLim=true; %limit training data to \theta=20 degree only 
+NNtype = 4; % 1=Black Box 2=Meaning Informed; 3=Physics Informed, labeled training only; 4=Physice Informed, add unlabeled data
+angleLim = false; %limit training data to \theta=20 degree only 
 
 load("./m=50/dataFull.mat"); % load training data
-targetTbl=[targetTbl,geomTbl]; % add configArr to target table
-geomSz=size(geomTbl,2); 
+targetTbl =[targetTbl,geomTbl]; % add configArr to target table
+geomSz =size(geomTbl,2); 
 
 % setup the ANN
-layers=layerGraph();
+layers =layerGraph();
 
-tempLayers=[
+tempLayers =[
     sequenceInputLayer(geomSz,"Name","sequence")
     sequenceFoldingLayer("Name","fold")
 ];
-layers=addLayers(layers,tempLayers);
-tempLayers=[
+layers =addLayers(layers,tempLayers);
+tempLayers =[
     splitLayer("split")
 ];
-layers=addLayers(layers,tempLayers);
+layers =addLayers(layers,tempLayers);
 
-tempLayers=[
+tempLayers = [
     fullyConnectedLayer(geomSz,"Name","fc_1")
     eluLayer("Name","relu1")
     fullyConnectedLayer(50,"Name","fc_2")
@@ -50,20 +50,20 @@ tempLayers=[
     fullyConnectedLayer(150,"Name","fc_3")
     fullyConnectedLayer(size(targetTbl,2)-geomSz,"Name","fc_out")
 ];
-layers=addLayers(layers,tempLayers);
+layers = addLayers(layers,tempLayers);
 
 tempLayers = [
     mergeNormLayer("merge")
 ];
-layers=addLayers(layers,tempLayers);
+layers = addLayers(layers,tempLayers);
 
 switch NNtype 
     case 1
-        regLr=regressionLayer("Name","regressionoutput");
+        regLr = regressionLayer("Name","regressionoutput");
     case 2
-        regLr=MGregressionLayer("MGregressionoutput",geomSz,5,1);
+        regLr = MGregressionLayer("MGregressionoutput",geomSz,5,1);
     case {3,4}
-        regLr=PGregressionLayer("PGregressionoutput",lam0,Lam,geomSz, true,...
+        regLr = PGregressionLayer("PGregressionoutput",lam0,Lam,geomSz, true,...
             5,1,75,100,0.5,1,300,150);
     otherwise 
         disp('error: unknown training regime')
@@ -75,16 +75,16 @@ tempLayers = [
     regLr
 ];
 
-layers=addLayers(layers,tempLayers);
+layers = addLayers(layers,tempLayers);
 clear tempLayers; 
 
 % connect network
-layers=connectLayers(layers,"fold/out","split");
-layers=connectLayers(layers,"split/data","fc_1");
-layers=connectLayers(layers,"split/config","merge/config");
-layers=connectLayers(layers,"fc_out","merge/data");
-layers=connectLayers(layers,"merge","unfold/in");
-layers=connectLayers(layers,'fold/miniBatchSize','unfold/miniBatchSize');
+layers = connectLayers(layers,"fold/out","split");
+layers = connectLayers(layers,"split/data","fc_1");
+layers = connectLayers(layers,"split/config","merge/config");
+layers = connectLayers(layers,"fc_out","merge/data");
+layers = connectLayers(layers,"merge","unfold/in");
+layers = connectLayers(layers,'fold/miniBatchSize','unfold/miniBatchSize');
 
 
 % Plot the ANN
@@ -93,33 +93,32 @@ set(gca,'FontSize',18)
 plot(layers);
 
 % Prepare the Data
-numDat=size(geomTbl,1);  
-[train,val,test]=dividerand(numDat,0.1,0.1,0.8); 
+numDat = size(geomTbl,1);  
+[train,val,test] = dividerand(numDat,0.1,0.1,0.8); 
 
 % further limit training data to particular value of parameter theta
 if angleLim
-    tmp=geomTbl(train,1); 
-    val=[val,train(tmp~=20)]; 
-%     val=train(tmp~=20); 
-    train=train(tmp==20); 
+    tmp = geomTbl(train,1); 
+    val = [val,train(tmp~=20)]; 
+    train = train(tmp==20); 
 end 
 
-xTrain=geomTbl(train,:).'; xVal=geomTbl(val,:).'; xTest=geomTbl(test,:).'; 
-yTrain=targetTbl(train,:).';yVal=targetTbl(val,:).'; yTest=targetTbl(test,:).';
+xTrain = geomTbl(train,:).'; xVal = geomTbl(val,:).'; xTest = geomTbl(test,:).'; 
+yTrain = targetTbl(train,:).';yVal = targetTbl(val,:).'; yTest = targetTbl(test,:).';
 
-xTrainI=xTrain; 
-xTestI=xTest; 
-xValI=xVal; 
+xTrainI = xTrain; 
+xTestI = xTest; 
+xValI = xVal; 
 
-if NNtype==4
+if NNtype ==4
     % add validation data as unlabeled data to the training set
-    xTrainE=[xTrainI, xValI];
-    yTmp=yVal.*rand(size(yVal,1),size(yVal,2));  %scramble "unlabeled" data
-    yTmp((1),:)=0; % marks "unlabeled" data 
-    yTmp((end-geomSz:end),:)=yVal((end-geomSz:end),:); %restore correct configuration data 
-    yTrainE=[yTrain,yTmp]; 
+    xTrainE =[xTrainI, xValI];
+    yTmp = yVal.*rand(size(yVal,1), size(yVal,2));  %scramble "unlabeled" data
+    yTmp((1),:) = 0; % marks "unlabeled" data 
+    yTmp((end-geomSz:end),:) = yVal((end-geomSz:end),:); %restore correct configuration data 
+    yTrainE =[yTrain, yTmp]; 
 else 
-    xTrainE=xTrainI; yTrainE=yTrain; 
+    xTrainE =xTrainI; yTrainE =yTrain; 
 end 
     
 % Train and validate the network
@@ -136,8 +135,6 @@ options = trainingOptions('adam', ...
     'Plots','training-progress', ...
     'ExecutionEnvironment',"gpu",...
     'Verbose',0);
-%     'ValidationData',{xValI,yVal}, ...
-%     'ValidationFrequency',500,...
 
 tic
 net = trainNetwork(xTrainE,yTrainE,layers,options);

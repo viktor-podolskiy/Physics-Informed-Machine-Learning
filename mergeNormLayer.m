@@ -23,9 +23,9 @@ classdef mergeNormLayer < nnet.layer.Layer
 
             % Layer constructor function goes here.
             layer.Name = name;
-            layer.Description='Normalizaion of eigenvectors'; 
-            layer.NumInputs=2; 
-            layer.InputNames={'data','config'}; 
+            layer.Description = 'Normalizaion of eigenvectors'; 
+            layer.NumInputs = 2; 
+            layer.InputNames = {'data','config'}; 
         end
         
         function [Z1] = predict(~, X1,X2)
@@ -40,48 +40,48 @@ classdef mergeNormLayer < nnet.layer.Layer
             %         Z1, ..., Zm - Outputs of layer forward function
             % Layer forward function for prediction goes here.
 
-            S=size(X1,1); 
-            evVal=[1,2]; %nVal=2; 
-            evVect=(3:S); %nVect=S-2; 
+            S = size(X1,1); 
+            evVal = [1,2]; %nVal=2; 
+            evVect = (3:S); %nVect=S-2; 
             
             %split the eigenvector off and calculate its norm
-            xVect=X1(evVect,:,:); 
-            x2=xVect.*xVect; 
-            xA=sqrt(sum(x2,1)); %+1e-8; 
+            xVect = X1(evVect,:,:); 
+            x2 = xVect.*xVect; 
+            xA = sqrt(sum(x2,1)); %+1e-8; 
 
             % don't touch the eigenvalue
-            tmp=zeros(S,1, 'like',X1);
-            tmp(evVect)=1; 
-            xNorm=tmp.*xA;
-            xNorm(evVal,:)=1; 
+            tmp = zeros(S,1, 'like',X1);
+            tmp(evVect) =1; 
+            xNorm = tmp.*xA;
+            xNorm(evVal,:) = 1; 
             
             % normalize the eigenvector
-            X1=X1./xNorm; %normalize the eigenvector
+            X1 = X1./xNorm; %normalize the eigenvector
 
-            Z1=[X1;X2]; 
+            Z1 = [X1;X2]; 
         end
         
-        function [dLdX1,dLdX2]=backward(~,X1,~,~,dLdZ1,~)
+        function [dLdX1,dLdX2] = backward(~,X1,~,~,dLdZ1,~)
 %         function [dLdX1,dLdX2]=ttt(~,X1,~,~,dLdZ1,~)
-            S=size(X1,1); O=size(X1,2); 
-            evVal=[1,2]; %nVal=2; 
-            evVect=(3:S); %nVect=S-2; 
+            S = size(X1,1); O = size(X1,2); 
+            evVal = [1,2]; %nVal=2; 
+            evVect = (3:S); %nVect=S-2; 
             
             %split the eigenvector off and calculate its norm
-            xVect=X1(evVect,:,:); 
-            x2=xVect.*xVect; 
-            xA=sqrt(sum(x2,1)); %+1e-8; 
+            xVect = X1(evVect,:,:); 
+            x2 = xVect.*xVect; 
+            xA = sqrt(sum(x2,1)); %+1e-8; 
 
-            dLdX1=zeros(S,O,'like',X1); 
-            dLdX1(evVal,:)=dLdZ1(evVal,:); 
+            dLdX1 = zeros(S,O,'like',X1); 
+            dLdX1(evVal,:) = dLdZ1(evVal,:); 
             
-            dLdZvec=reshape(dLdZ1(evVect,:),1,S-2,O); 
-            dZdX=reshape(1./xA,1,1,O).*eye(S-2)-...
+            dLdZvec = reshape(dLdZ1(evVect,:),1,S-2,O); 
+            dZdX = reshape(1./xA,1,1,O).*eye(S-2)-...
                 reshape(1./xA.^3,1,1,O).*reshape(xVect,1,S-2,O).*reshape(xVect,S-2,1,O); 
-            dLdXvec=reshape(sum(dLdZvec.*dZdX,2),S-2,O); 
-            dLdX1(evVect,:)=dLdXvec; 
+            dLdXvec = reshape(sum(dLdZvec.*dZdX,2),S-2,O); 
+            dLdX1(evVect,:) = dLdXvec; 
             
-            dLdX2=dLdZ1(S+1:end,:)*0; 
+            dLdX2 = dLdZ1(S+1:end,:)*0; 
         end 
             
     end
