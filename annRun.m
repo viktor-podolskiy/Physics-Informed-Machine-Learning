@@ -17,7 +17,7 @@ fname ='./m=50/ANNtest.mat'; % file name used for string the resulting ANN
 
 rng(3988) % initialize random number generator to enforce repeatability of train/test/val splits
 
-NNtype = 4; % 1=Black Box 2=Meaning Informed; 3=Physics Informed, labeled training only; 4=Physice Informed, add unlabeled data
+NNtype = 2; % 1=Black Box 2=Meaning Informed; 3=Physics Informed, labeled training only; 4=Physice Informed, add unlabeled data
 angleLim = false; %limit training data to \theta=20 degree only 
 
 load("./m=50/dataFull.mat"); % load training data
